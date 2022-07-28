@@ -2,7 +2,7 @@ package celeritas
 
 import "os"
 
-func (c *Celeritas) CreateDirIfNotExists(path string) error {
+func (c *Celeritas) CreateDirIfNotExist(path string) error {
 	const mode = 0755
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		err := os.Mkdir(path, mode)
@@ -10,6 +10,7 @@ func (c *Celeritas) CreateDirIfNotExists(path string) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -20,6 +21,7 @@ func (c *Celeritas) CreateFileIfNotExists(path string) error {
 		if err != nil {
 			return err
 		}
+
 		defer func(file *os.File) {
 			_ = file.Close()
 		}(file)

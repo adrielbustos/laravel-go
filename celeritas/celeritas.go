@@ -8,13 +8,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"github.com/tsawler/celeritas/render"
 )
 
 const version = "1.0.0"
 
+// Celeritas is the overall type for the Celeritas package. Members that are exported in this type
+// are available to any application that uses it.
 type Celeritas struct {
 	AppName  string
 	Debug    bool
@@ -32,15 +34,19 @@ type config struct {
 	renderer string
 }
 
+// New reads the .env file, creates our application config, populates the Celeritas type with settings
+// based on .env values, and creates necessary folders and files if they don't exist
 func (c *Celeritas) New(rootPath string) error {
 	pathConfig := initPaths{
 		rootPath:    rootPath,
-		folderNames: []string{"handers", "migrations", "views", "data", "public", "tmp", "logs", "middleware"},
+		folderNames: []string{"handlers", "migrations", "views", "data", "public", "tmp", "logs", "middleware"},
 	}
+
 	err := c.Init(pathConfig)
 	if err != nil {
 		return err
 	}
+
 	err = c.checkDotEnv(rootPath)
 	if err != nil {
 		return err
@@ -53,7 +59,7 @@ func (c *Celeritas) New(rootPath string) error {
 	}
 
 	// create loggers
-	infoLog, errorLog := c.startLoggers(rootPath)
+	infoLog, errorLog := c.startLoggers()
 	c.InfoLog = infoLog
 	c.ErrorLog = errorLog
 	c.Debug, _ = strconv.ParseBool(os.Getenv("DEBUG"))
@@ -61,20 +67,22 @@ func (c *Celeritas) New(rootPath string) error {
 	c.RootPath = rootPath
 	c.Routes = c.routes().(*chi.Mux)
 
-	c.Render = c.createRenderer(c)
-
 	c.config = config{
 		port:     os.Getenv("PORT"),
 		renderer: os.Getenv("RENDERER"),
 	}
 
+	c.createRenderer()
+
 	return nil
 }
 
+// Init creates necessary folders for our Celeritas application
 func (c *Celeritas) Init(p initPaths) error {
 	root := p.rootPath
 	for _, path := range p.folderNames {
-		err := c.CreateDirIfNotExists(root + "/" + path)
+		// create folder if it doesn't exist
+		err := c.CreateDirIfNotExist(root + "/" + path)
 		if err != nil {
 			return err
 		}
@@ -84,16 +92,16 @@ func (c *Celeritas) Init(p initPaths) error {
 
 // ListenAndServe starts the web server
 func (c *Celeritas) ListenAndServe() {
-	port := os.Getenv("PORT")
 	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%s", port),
+		Addr:         fmt.Sprintf(":%s", os.Getenv("PORT")),
 		ErrorLog:     c.ErrorLog,
 		Handler:      c.Routes,
 		IdleTimeout:  30 * time.Second,
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 600 * time.Second,
 	}
-	c.InfoLog.Printf("Listening on port %s", port)
+
+	c.InfoLog.Printf("Listening on port %s", os.Getenv("PORT"))
 	err := srv.ListenAndServe()
 	c.ErrorLog.Fatal(err)
 }
@@ -106,19 +114,21 @@ func (c *Celeritas) checkDotEnv(path string) error {
 	return nil
 }
 
-func (c *Celeritas) startLoggers(path string) (*log.Logger, *log.Logger) {
+func (c *Celeritas) startLoggers() (*log.Logger, *log.Logger) {
 	var infoLog *log.Logger
 	var errorLog *log.Logger
+
 	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
 	return infoLog, errorLog
 }
 
-func (c *Celeritas) createRenderer(cel *Celeritas) *render.Render {
-	myRender := render.Render{
-		Renderer: cel.config.renderer,
-		RootPath: cel.RootPath,
-		Port:     cel.config.port,
+func (c *Celeritas) createRenderer() {
+	myRenderer := render.Render{
+		Renderer: c.config.renderer,
+		RootPath: c.RootPath,
+		Port:     c.config.port,
 	}
-	return &myRender
+	c.Render = &myRenderer
 }

@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"myapp/handers"
+	"myapp/handlers"
 	"os"
 
 	"github.com/tsawler/celeritas"
@@ -23,13 +23,13 @@ func initApplication() *application {
 
 	cel.AppName = "myapp"
 
-	myHanders := &handers.Handers{
+	myHandlers := &handlers.Handlers{
 		App: cel,
 	}
 
 	app := &application{
-		App:     cel,
-		Handers: myHanders,
+		App: cel,
+		Handlers: myHandlers,
 	}
 
 	app.App.Routes = app.routes()
