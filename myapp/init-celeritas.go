@@ -12,13 +12,18 @@ func initApplication() *application {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// init celeritas
 	cel := &celeritas.Celeritas{}
 	err = cel.New(path)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	cel.AppName = "myapp"
-	cel.Debug = true
+	// fmt.Println("DEBUG is set to", cel.Debug)
+	cel.InfoLog.Println("DEBUG is set to", cel.Debug)
+
 	app := &application{
 		App: cel,
 	}
