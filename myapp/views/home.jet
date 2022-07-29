@@ -7,6 +7,7 @@
 {{end}}
 
 {{block pageContent()}}
+
 <div class="col text-center">
     <div class="d-flex align-items-center justify-content-center" style="height: 100vh;">
         <div>
@@ -17,7 +18,9 @@
         </div>
     </div>
 </div>
+
 {{end}}
+
 
 {{block js()}}
 
