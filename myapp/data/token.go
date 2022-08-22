@@ -15,5 +15,5 @@ type Token struct {
 }
 
 func (t *Token) Table() string {
-	return "users"
+	return "tokens"
 }
