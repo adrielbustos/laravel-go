@@ -103,7 +103,7 @@ func (c *Celeritas) New(rootPath string) error {
 		sessionType: os.Getenv("SESSION_TYPE"),
 		database: databaseConfig{
 			database: os.Getenv("DATABASE_TYPE"),
-			dsn: c.BuildDSN(),
+			dsn:      c.BuildDSN(),
 		},
 	}
 
@@ -186,6 +186,7 @@ func (c *Celeritas) createRenderer() {
 		RootPath: c.RootPath,
 		Port:     c.config.port,
 		JetViews: c.JetViews,
+		Session:  c.Session,
 	}
 	c.Render = &myRenderer
 }

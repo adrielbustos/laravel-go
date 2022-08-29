@@ -18,13 +18,17 @@ func (a *application) routes() *chi.Mux {
 	a.App.Routes.Get("/jet-page", a.Handlers.JetPage)
 	a.App.Routes.Get("/sessions", a.Handlers.SessionTest)
 
+	a.App.Routes.Get("/users/login", a.Handlers.UserLogin)
+	a.App.Routes.Post("/users/login", a.Handlers.PostUserLogin)
+	a.App.Routes.Get("/users/logout", a.Handlers.Logout)
+
 	a.App.Routes.Get("/create-user", func(w http.ResponseWriter, r *http.Request) {
-		u := data.User {
+		u := data.User{
 			FirstName: "Trevor",
-			LastName: "Sawler",
-			Email: "me@here.com",
-			Active: 1,
-			Password: "password",
+			LastName:  "Sawler",
+			Email:     "me@here.com",
+			Active:    1,
+			Password:  "password",
 		}
 
 		id, err := a.Models.Users.Insert(u)
@@ -36,7 +40,7 @@ func (a *application) routes() *chi.Mux {
 		fmt.Fprintf(w, "%d: %s", id, u.FirstName)
 	})
 
-	a.App.Routes.Get("/get-all-users", func(w http.ResponseWriter, r *http.Request){
+	a.App.Routes.Get("/get-all-users", func(w http.ResponseWriter, r *http.Request) {
 		users, err := a.Models.Users.GetAll()
 		if err != nil {
 			a.App.ErrorLog.Println(err)
@@ -47,7 +51,7 @@ func (a *application) routes() *chi.Mux {
 		}
 	})
 
-	a.App.Routes.Get("/get-user/{id}", func(w http.ResponseWriter, r *http.Request){
+	a.App.Routes.Get("/get-user/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 
 		u, err := a.Models.Users.Get(id)
